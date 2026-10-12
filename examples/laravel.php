@@ -18,9 +18,9 @@ declare(strict_types=1);
 //     {
 //         // Idempotenza legata all'ordine: retry sicuri, niente doppi SMS.
 //         $res = ZipSms::sms()->send(
-//             deviceId: $deviceId,
 //             to: $phone,
 //             message: 'Il tuo ordine è pronto!',
+//             deviceName: $deviceName, // oppure deviceId: $deviceId (esattamente uno)
 //             reference: 'ordine-' . request()->route('id'),
 //             idempotencyKey: 'ordine-' . request()->route('id'),
 //         );

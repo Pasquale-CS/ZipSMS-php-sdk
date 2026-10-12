@@ -164,4 +164,28 @@ final class Validator
         }
         return array_values(array_map([self::class, 'deviceId'], $ids));
     }
+
+    /**
+     * Target del device per l'invio: esattamente uno tra deviceId e deviceName
+     * (mirror del DTO SendSmsR1Dto). Restituisce il frammento di payload.
+     *
+     * @return array{deviceId?:string,deviceName?:string}
+     */
+    public static function deviceTarget(?string $deviceId, ?string $deviceName): array
+    {
+        $hasId = $deviceId !== null && trim($deviceId) !== '';
+        $hasName = $deviceName !== null && trim($deviceName) !== '';
+
+        if ($hasId === $hasName) {
+            throw new ValidationException(
+                'Indicare esattamente uno tra deviceId e deviceName (uno solo, non entrambi).'
+            );
+        }
+
+        if ($hasId) {
+            return ['deviceId' => self::deviceId($deviceId)];
+        }
+
+        return ['deviceName' => self::deviceName($deviceName)];
+    }
 }

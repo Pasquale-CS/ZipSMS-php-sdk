@@ -50,4 +50,24 @@ final class ValidatorTest extends TestCase
         $this->expectException(ValidationException::class);
         Validator::deviceName('Ufficio 1!');
     }
+
+    public function testDeviceTargetExactlyOne(): void
+    {
+        $this->assertSame(['deviceId' => 'dev-1'], Validator::deviceTarget('dev-1', null));
+        $this->assertSame(['deviceName' => 'ufficio-1'], Validator::deviceTarget(null, 'ufficio-1'));
+
+        try {
+            Validator::deviceTarget('dev-1', 'ufficio-1');
+            $this->fail('attesi entrambi → eccezione');
+        } catch (ValidationException) {
+            // ok
+        }
+
+        try {
+            Validator::deviceTarget(null, null);
+            $this->fail('attesi nessuno → eccezione');
+        } catch (ValidationException) {
+            // ok
+        }
+    }
 }

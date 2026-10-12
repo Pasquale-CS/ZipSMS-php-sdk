@@ -41,7 +41,7 @@ final class SmsTest extends TestCase
             new Response(202, ['Content-Type' => 'application/json'], '{"id":"uuid-1","status":"QUEUED","segments":1}')
         );
 
-        $res = $client->sms()->send('dev-1', '+39 333 123 4567', 'Ciao!', 'ordine-1', 'key-123');
+        $res = $client->sms()->send('+39 333 123 4567', 'Ciao!', 'dev-1', null, 'ordine-1', 'key-123');
 
         $this->assertSame('uuid-1', $res['id']);
         $this->assertCount(1, $this->history);
@@ -62,7 +62,7 @@ final class SmsTest extends TestCase
         $client = $this->clientWithResponses(
             new Response(202, ['Content-Type' => 'application/json'], '{"id":"uuid-2","status":"QUEUED"}')
         );
-        $client->sms()->send('dev-1', '+393331234567', 'Ciao!');
+        $client->sms()->send('+393331234567', 'Ciao!', deviceId: 'dev-1');
 
         $key = $this->history[0]['request']->getHeaderLine('Idempotency-Key');
         $this->assertNotSame('', $key);
@@ -75,8 +75,45 @@ final class SmsTest extends TestCase
             new Response(202, [], '{}')
         );
         $this->expectException(ValidationException::class);
-        $client->sms()->send('dev-1', 'not-a-number', 'Ciao!');
+        $client->sms()->send('not-a-number', 'Ciao!', deviceId: 'dev-1');
         $this->assertCount(0, $this->history); // nessuna chiamata HTTP
+    }
+
+    public function testSendByDeviceName(): void
+    {
+        $client = $this->clientWithResponses(
+            new Response(202, ['Content-Type' => 'application/json'], '{"id":"uuid-3","status":"QUEUED"}')
+        );
+
+        $client->sms()->send('+393331234567', 'Ciao!', deviceName: 'ufficio-1');
+
+        $body = json_decode((string) $this->history[0]['request']->getBody(), true);
+        $this->assertSame('ufficio-1', $body['deviceName']);
+        $this->assertArrayNotHasKey('deviceId', $body);
+    }
+
+    public function testSendRejectsBothTargets(): void
+    {
+        $client = $this->clientWithResponses(new Response(202, [], '{}'));
+        try {
+            $client->sms()->send('+393331234567', 'Ciao!', 'dev-1', 'ufficio-1');
+            $this->fail('attesa ValidationException');
+        } catch (ValidationException $e) {
+            $this->assertCount(0, $this->history); // nessuna chiamata HTTP
+            $this->assertStringContainsString('esattamente uno', $e->getMessage());
+        }
+    }
+
+    public function testSendRejectsMissingTarget(): void
+    {
+        $client = $this->clientWithResponses(new Response(202, [], '{}'));
+        try {
+            $client->sms()->send('+393331234567', 'Ciao!');
+            $this->fail('attesa ValidationException');
+        } catch (ValidationException $e) {
+            $this->assertCount(0, $this->history); // nessuna chiamata HTTP
+            $this->assertStringContainsString('esattamente uno', $e->getMessage());
+        }
     }
 
     public function testMaps401(): void

@@ -17,9 +17,10 @@ $client = ZipSmsClient::create(
 
 try {
     $res = $client->sms()->send(
-        deviceId: 'tuo-device-id',
         to: '+393331234567',
         message: 'Ciao da ZipSMS!',
+        // Target: esattamente uno tra i due (nuovo contratto API):
+        deviceName: 'ufficio-1',       // …oppure deviceId: 'tuo-device-id',
         reference: 'ordine-123',       // opzionale: tuo riferimento interno
         // idempotencyKey: null → UUIDv4 auto-generato. Passane uno tuo
         // (es. UUID dell'ordine) per retry sicuri senza doppi invii.

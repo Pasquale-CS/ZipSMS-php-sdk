@@ -21,17 +21,20 @@ final class Sms
     /**
      * Accoda un SMS (R1). Idempotente via Idempotency-Key.
      *
+     * Target: esattamente uno tra $deviceId e $deviceName (come il DTO server).
+     * Il $deviceName evita di dover risolvere l'id prima dell'invio.
+     *
      * @return array{id?:string,status?:string,segments?:int,...} es. ['id'=>..., 'status'=>'QUEUED', 'segments'=>1]
      */
     public function send(
-        string $deviceId,
         string $to,
         string $message,
+        ?string $deviceId = null,
+        ?string $deviceName = null,
         ?string $reference = null,
         ?string $idempotencyKey = null,
     ): array {
-        $payload = [
-            'deviceId' => Validator::deviceId($deviceId),
+        $payload = Validator::deviceTarget($deviceId, $deviceName) + [
             'to' => Validator::phone($to),
             'message' => Validator::message($message),
         ];
@@ -53,15 +56,16 @@ final class Sms
      * @throws \ZipSms\Exceptions\ZipSmsException allo scadere del timeout
      */
     public function sendAndWait(
-        string $deviceId,
         string $to,
         string $message,
+        ?string $deviceId = null,
+        ?string $deviceName = null,
         ?string $reference = null,
         ?string $idempotencyKey = null,
         int $timeoutSeconds = 120,
         int $pollIntervalSeconds = 3,
     ): array {
-        $sent = $this->send($deviceId, $to, $message, $reference, $idempotencyKey);
+        $sent = $this->send($to, $message, $deviceId, $deviceName, $reference, $idempotencyKey);
         $id = $sent['id'] ?? null;
         if (!\is_string($id) || $id === '') {
             return $sent; // risposta inattesa: la restituiamo così com'è

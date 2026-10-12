@@ -20,9 +20,9 @@ use ZipSms\ZipSmsClient;
 $zip = ZipSmsClient::create($_ENV['ZIPSMS_API_KEY']); // base URL di default: https://zipsms-gateway.pcs.website
 
 $res = $zip->sms()->send(
-    deviceId: 'tuo-device-id',
     to: '+393331234567',
     message: 'Ciao da ZipSMS!',
+    deviceName: 'ufficio-1',  // oppure deviceId: 'tuo-device-id' (esattamente uno)
     reference: 'ordine-123', // opzionale
     // idempotencyKey: null → UUIDv4 automatico
 );
@@ -37,7 +37,7 @@ echo $res['id'] . ' ' . $res['status']; // es. QUEUED
 chiave stabile legata al tuo dominio (es. `ordine-123`):
 
 ```php
-$zip->sms()->send($deviceId, $to, $msg, reference: 'ordine-123', idempotencyKey: 'ordine-123');
+$zip->sms()->send($to, $msg, deviceId: $deviceId, reference: 'ordine-123', idempotencyKey: 'ordine-123');
 ```
 
 ### Stato / lista SMS
@@ -77,14 +77,14 @@ ZIPSMS_BASE_URL=https://zipsms-gateway.pcs.website
 ```php
 use ZipSms\Laravel\Facades\ZipSms;
 
-ZipSms::sms()->send($deviceId, '+393331234567', 'Ciao!');
+ZipSms::sms()->send('+393331234567', 'Ciao!', deviceName: 'ufficio-1');
 ```
 
 ## Gestione errori
 
 | HTTP | Eccezione | Quando |
 |------|-----------|--------|
-| 400/422 | `ValidationException` | E.164 errato, testo >1600, deviceId… |
+| 400/422 | `ValidationException` | E.164 errato, testo >1600, deviceId/deviceName… |
 | 401/403 | `AuthenticationException` | API key mancante/revocata |
 | 404 | `NotFoundException` | Device/SMS non tuo |
 | 409 | `ConflictException` | Device revocato, transizione illegale |

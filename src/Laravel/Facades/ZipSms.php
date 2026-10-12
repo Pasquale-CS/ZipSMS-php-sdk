@@ -15,7 +15,7 @@ use ZipSms\Resources\Usage;
  * @method static Devices devices()
  * @method static Usage usage()
  * @method static App app()
- * @method static array send(string $deviceId, string $to, string $message, ?string $reference = null, ?string $idempotencyKey = null)
+ * @method static array send(string $to, string $message, ?string $deviceId = null, ?string $deviceName = null, ?string $reference = null, ?string $idempotencyKey = null)
  *
  * @see \ZipSms\ZipSmsClient
  */
