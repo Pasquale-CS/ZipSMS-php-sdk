@@ -1,0 +1,40 @@
+{
+    "name": "pasquale-cs/zipsms-php-sdk",
+    "description": "SDK PHP ufficiale per ZipSMS Gateway — invio SMS tramite il proprio dispositivo Android.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["zipsms", "sms", "gateway", "sdk", "laravel"],
+    "require": {
+        "php": ">=8.1",
+        "guzzlehttp/guzzle": "^7.8",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "ZipSms\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "ZipSms\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "ZipSms\\Laravel\\ZipSmsServiceProvider"
+            ],
+            "aliases": {
+                "ZipSms": "ZipSms\\Laravel\\Facades\\ZipSms"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "config": {
+        "sort-packages": true
+    }
+}
